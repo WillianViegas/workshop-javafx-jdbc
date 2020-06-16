@@ -15,6 +15,7 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.VBox;
+import model.services.DepartmentServices;
 
 public class MainViewController implements Initializable {
 	
@@ -34,7 +35,7 @@ public class MainViewController implements Initializable {
 	
 	@FXML
 	public void onMenuDepartmentAction() {
-		loadView("/gui/DepartmentList.fxml");
+		loadView2("/gui/DepartmentList.fxml");
 	}
 	
 	@FXML
@@ -60,6 +61,30 @@ public class MainViewController implements Initializable {
 			mainVBox.getChildren().clear();
 			mainVBox.getChildren().add(mainMenu);
 			mainVBox.getChildren().addAll(newVBox.getChildren());
+		}
+		catch(IOException e) {
+			Alerts.showAlerts("IO Exception", "Error loading view", e.getMessage(), AlertType.ERROR);
+		}
+		
+	}
+	
+	private synchronized void loadView2(String absoluteName) {
+		try {
+			FXMLLoader loader = new FXMLLoader(getClass().getResource(absoluteName));
+			VBox newVBox = loader.load();	
+			
+			Scene mainScene = Main.getMainScene();
+			//Acessa a scroll pane da main scene, converte ela pra scroll pane, pega o conteudo de dentro e converte para vbox
+			VBox mainVBox = (VBox) ((ScrollPane) mainScene.getRoot()).getContent();
+			
+			Node mainMenu = mainVBox.getChildren().get(0);
+			mainVBox.getChildren().clear();
+			mainVBox.getChildren().add(mainMenu);
+			mainVBox.getChildren().addAll(newVBox.getChildren());
+			
+			DepartmentListController controller = loader.getController();
+			controller.setDepartmentService(new DepartmentServices());
+			controller.updateTableView();
 		}
 		catch(IOException e) {
 			Alerts.showAlerts("IO Exception", "Error loading view", e.getMessage(), AlertType.ERROR);
